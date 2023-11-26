@@ -21,25 +21,6 @@ const db = mysql.createConnection({
 console.log(`Connected to employee_db`)
 );
 
-// initial questions displayed upon running app
-const initQuestions = [
-    {
-        type: 'list',
-        name: 'menu',
-        message: 'What would you like to do?',
-        choices: [
-            'View All Employees',
-            'View All Departments',
-            'View All Roles',
-            'Add Department',
-            'Add Role',
-            'Add Employee',
-            'Update Employee',
-            'Quit'
-        ]
-    }
-];
-
 // print ascii logo
 const header = logo({ name: 'Employee Tracker'}).render();
 console.log(header);
@@ -47,7 +28,23 @@ console.log(header);
 // function to initiate app
 const init = () => {
 
-    inquirer.prompt(initQuestions).then((response) => {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'menu',
+            message: 'What would you like to do?',
+            choices: [
+                'View All Employees',
+                'View All Departments',
+                'View All Roles',
+                'Add Department',
+                'Add Role',
+                'Add Employee',
+                'Update Employee',
+                'Quit'
+            ]
+        }
+    ]).then((response) => {
         let ans = response.menu;
         switch(ans) {
             case 'View All Employees':
@@ -83,7 +80,8 @@ const init = () => {
 
 // query to see all employees
 const viewEmp = () => {
-    db.query('SELECT * FROM employee_list', (err, res) => {
+    db.query(
+        `SELECT * FROM employee_list`, (err, res) => {
         err ? console.log(err) : console.table(res),
         init();
     })
@@ -107,21 +105,25 @@ const viewRoles = () => {
 
 // query to add a new department
 const addDept = () => {
+
     inquirer.prompt([
         {
             type: 'input',
             name: 'addDep',
             message: 'What is the name of the department?'
         }
-    ]).then((response) => {
-        let ans = response.addDep;
+    ])
+    
+    .then((response) => {
+
+        let newDep = response.addDep;
         
         db.query(
-            `INSERT INTO dep_list (dep_name) 
-                VALUES
-                    ('${ans}')`, 
+        `INSERT INTO dep_list (dep_name) 
+            VALUES
+                ('${newDep}')`, 
             (err, res) => {
-                err ? console.log(err) : console.table(`Added ${ans} to database!`, res),
+                err ? console.log(err) : console.table(`Added ${newDep} to database!`, res),
                 init();
             }
         );
@@ -137,7 +139,7 @@ const addRole = () => {
         }
         const deptChoices = res.map((department) => ({
             value: department.id,
-            name: department.dept_name,
+            name: department.dep_name
           }));
         inquirer.prompt([
             {
@@ -160,12 +162,12 @@ const addRole = () => {
             let deptId = response.departmentId;
             let roleName = response.rolesName;
             let roleSalary = response.salary;
-            db.query(`
-                INSERT INTO role_list (title, salary, dep_list_id)
+            db.query(
+                `INSERT INTO role_list (title, salary, dep_list_id)
                     VALUES
                     ('${roleName}', '${roleSalary}','${deptId}')`, 
                     (err, res) => {
-                        err ? console.log(err) : console.table(`Added ${roleName}`, res),
+                        err ? console.log(err) : console.table(`Added ${roleName} to the database`, res),
                         init();
                     }
                 );
@@ -196,7 +198,7 @@ const addEmp = () => {
             const managerChoices = empRes.map((employee) => ({
                 value: employee.id,
                 name: `${employee.first_name} ${employee.last_name}`,
-              }));
+            }));
 
             managerChoices.push(
                 { 
@@ -228,19 +230,21 @@ const addEmp = () => {
                     choices: managerChoices
                 }
             ]).then((response) => {
-                let roleId = response.roleId;
-                let empFirst = response.firstName;
-                let empLast = response.lastName;
-                let managerId = response.managerId;
+                const roleId = response.roleId;
+                const empFirst = response.firstName;
+                const empLast = response.lastName;
+                const managerId = response.managerId;
                 db.query(
                     `INSERT INTO employee_list ( first_name, last_name, role_list_id, manager_id)
                         VALUES
-                        ('${empFirst}', '${empLast}', '${roleId}', '${managerId}')`,
-                (err, res) => {
-                    err ? console.log(err) : console.table(`Added ${empFirst} ${empLast} to the database`, res),
-                    init();
-                });
-            });
+                            ('${empFirst}', '${empLast}', '${roleId}', '${managerId}')`,
+                        (err, res) => {
+                            err ? console.log(err) : console.table(`Added ${empFirst} ${empLast} to the database`, res),
+                            init();
+                        }
+                    );
+                }
+            );
         });
     });
 };
@@ -262,15 +266,15 @@ const updateEmp = () => {
     ]).then((response) => { 
         const { empId, roleId } = response;
 
-        db.query(`
-            UPDATE employee_list
+        db.query(
+            `UPDATE employee_list
             SET role_list_id = ?
             WHERE id =?`,
             [roleId, empId], (err, res) => {
-                if(err){
+                if(err) {
                     console.log(err);
-                } else{
-                    console.log(`Updated employee's role`);
+                } else {
+                    console.log(`Updated ${empId}'s role`);
                 }
                 init();
             }
