@@ -81,7 +81,18 @@ const init = () => {
 // query to see all employees
 const viewEmp = () => {
     db.query(
-        `SELECT * FROM employee_list`, (err, res) => {
+        `SELECT 
+        e.id AS 'Employee ID',
+        e.first_name AS 'First Name',
+        e.last_name AS 'Last Name',
+        r.title AS 'Job Title',
+        d.dep_name AS 'Department',
+        r.salary AS 'Salary',
+        CONCAT(m.first_name, ' ', m.last_name) AS 'Manager'
+    FROM employee_list e
+    JOIN role_list r ON e.role_list_id = r.id
+    JOIN dep_list d ON r.dep_list_id = d.id
+    LEFT JOIN employee_list m ON e.manager_id = m.id;`, (err, res) => {
         err ? console.log(err) : console.table(res),
         init();
     })
@@ -89,7 +100,7 @@ const viewEmp = () => {
 
 // query to see all departments
 const viewDepts = () => {
-    db.query('SELECT * FROM dep_list', (err, res) => {
+    db.query(`SELECT id AS 'Department ID', dep_name AS 'Department Name' FROM dep_list;`, (err, res) => {
         err ? console.log(err) : console.table(res),
         init();
     })
@@ -97,7 +108,13 @@ const viewDepts = () => {
 
 // query to see all roles
 const viewRoles = () => {
-    db.query('SELECT * FROM role_list', (err, res) => {
+    db.query(`SELECT 
+    r.id AS 'Role ID',
+    r.title AS 'Job Title',
+    r.salary AS 'Salary',
+    d.dep_name AS 'Department'
+FROM role_list r
+JOIN dep_list d ON r.dep_list_id = d.id;`, (err, res) => {
         err ? console.log(err) : console.table(res),
         init();
     })
