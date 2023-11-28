@@ -51,6 +51,10 @@ To use this app:
       2. Select new employee role
    8. Quit
 
+The link below is a video walkthrough on how the app works:
+
+[]()
+
 ## License
 
 Please refer to the LICENSE in the repo.
