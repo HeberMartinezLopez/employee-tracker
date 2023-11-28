@@ -115,7 +115,6 @@ function addDept(){
             message: 'What is the name of the department?'
         }
     ])
-    
     .then((response) => {
 
         let newDep = response.addDep;

@@ -24,13 +24,32 @@ By building this app any business owner is able to view and manage the departmen
 
 To install all the correct dependencies:
 
-1. Run `npm install`
+1. Run `npm install` in terminal.
 
 ## Usage
 
-To use this app: 
+To use this app:
 
-1. Run
+1. Run `npm start` in terminal.
+2. Select from the prompted menu:
+   1. View All Employees
+   2. View All Departments
+   3. View All Roles
+   4. Add Department
+      1. Enter department name
+   5. Add Role
+      1. Enter role name
+      2. Enter salary of role
+      3. Select department it belongs to
+   6. Add Employee
+      1. Enter employee first name
+      2. Enter employee last name
+      3. Select employees role
+      4. Select employee manager
+   7. Update Employee
+      1. Enter employee full name
+      2. Select new employee role
+   8. Quit
 
 ## License
 
