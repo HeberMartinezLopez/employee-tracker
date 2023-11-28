@@ -1,15 +1,7 @@
-// const express = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const logo = require('asciiart-logo');
-// const app = express();
 require('console.table');
-
-// const PORT = process.env.PORT || 3001;
-
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
-
 
 // mysql connection
 const db = mysql.createConnection({
@@ -26,7 +18,7 @@ const header = logo({ name: 'Employee Tracker'}).render();
 console.log(header);
 
 // function to initiate app
-const init = () => {
+function init() {
 
     inquirer.prompt([
         {
@@ -79,49 +71,42 @@ const init = () => {
 };
 
 // query to see all employees
-const viewEmp = () => {
+function viewEmp(){
     db.query(
-        `SELECT 
-        e.id AS 'Employee ID',
-        e.first_name AS 'First Name',
-        e.last_name AS 'Last Name',
-        r.title AS 'Job Title',
-        d.dep_name AS 'Department',
-        r.salary AS 'Salary',
+        `SELECT e.id AS 'Employee ID', e.first_name AS 'First Name', e.last_name AS 'Last Name', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary',
         CONCAT(m.first_name, ' ', m.last_name) AS 'Manager'
-    FROM employee_list e
-    JOIN role_list r ON e.role_list_id = r.id
-    JOIN dep_list d ON r.dep_list_id = d.id
-    LEFT JOIN employee_list m ON e.manager_id = m.id;`, (err, res) => {
-        err ? console.log(err) : console.table(res),
+        FROM employee_list e
+        JOIN role_list r ON e.role_list_id = r.id
+        JOIN dep_list d ON r.dep_list_id = d.id
+        LEFT JOIN employee_list m ON e.manager_id = m.id;`, 
+        (err, res) => {
+        err ? console.log(err) : console.table(`\n`,res),
         init();
     })
 };
 
 // query to see all departments
-const viewDepts = () => {
-    db.query(`SELECT id AS 'Department ID', dep_name AS 'Department Name' FROM dep_list;`, (err, res) => {
-        err ? console.log(err) : console.table(res),
+function viewDepts(){
+    db.query(`SELECT id AS 'Department ID', dep_name AS 'Department Name' FROM dep_list;`, 
+    (err, res) => {
+        err ? console.log(err) : console.table(`\n`, res),
         init();
     })
 };
 
 // query to see all roles
-const viewRoles = () => {
-    db.query(`SELECT 
-    r.id AS 'Role ID',
-    r.title AS 'Job Title',
-    r.salary AS 'Salary',
-    d.dep_name AS 'Department'
-FROM role_list r
-JOIN dep_list d ON r.dep_list_id = d.id;`, (err, res) => {
-        err ? console.log(err) : console.table(res),
+function viewRoles(){
+    db.query(`SELECT r.id AS 'Role ID', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary'
+    FROM role_list r
+    JOIN dep_list d ON r.dep_list_id = d.id;`, 
+    (err, res) => {
+        err ? console.log(err) : console.table(`\n`, res),
         init();
     })
 };
 
 // query to add a new department
-const addDept = () => {
+function addDept(){
 
     inquirer.prompt([
         {
@@ -139,8 +124,8 @@ const addDept = () => {
         `INSERT INTO dep_list (dep_name) 
             VALUES
                 ('${newDep}')`, 
-            (err, res) => {
-                err ? console.log(err) : console.table(`Added ${newDep} to database!`, res),
+            (err, __res) => {
+                err ? console.log(err) : console.table(`Added ${newDep} to database!`),
                 init();
             }
         );
@@ -148,7 +133,7 @@ const addDept = () => {
 };
 
 // query to add new role
-const addRole = () => {
+function addRole(){
     db.query('SELECT * FROM dep_list', (err, res) => {
         if (err){
             console.log(err);
@@ -183,8 +168,8 @@ const addRole = () => {
                 `INSERT INTO role_list (title, salary, dep_list_id)
                     VALUES
                     ('${roleName}', '${roleSalary}','${deptId}')`, 
-                    (err, res) => {
-                        err ? console.log(err) : console.table(`Added ${roleName} to the database`, res),
+                    (err, __res) => {
+                        err ? console.log(err) : console.table(`Added ${roleName} to the database`),
                         init();
                     }
                 );
@@ -194,7 +179,7 @@ const addRole = () => {
 };
 
 // query to add new employee
-const addEmp = () => {
+function addEmp (){
     db.query('SELECT * FROM role_list', (err, res) => {
         if(err){
             console.log(err);
@@ -219,7 +204,6 @@ const addEmp = () => {
 
             managerChoices.push(
                 { 
-                    value: null, 
                     name: 'No Manager'
                 }
             );
@@ -250,13 +234,13 @@ const addEmp = () => {
                 const roleId = response.roleId;
                 const empFirst = response.firstName;
                 const empLast = response.lastName;
-                const managerId = response.managerId;
+                const managerId = response.managerId === 'No Manager' ? null : response.managerId;
                 db.query(
-                    `INSERT INTO employee_list ( first_name, last_name, role_list_id, manager_id)
-                        VALUES
-                            ('${empFirst}', '${empLast}', '${roleId}', '${managerId}')`,
-                        (err, res) => {
-                            err ? console.log(err) : console.table(`Added ${empFirst} ${empLast} to the database`, res),
+                    `INSERT INTO employee_list (first_name, last_name, role_list_id, manager_id)
+                    VALUES (?, ?, ?, ?)`,
+                    [empFirst, empLast, roleId, managerId],
+                        (err, __res) => {
+                            err ? console.log(err) : console.table(`Added ${empFirst} ${empLast} to the database`),
                             init();
                         }
                     );
@@ -266,52 +250,76 @@ const addEmp = () => {
     });
 };
 
-// query to update employee
-const updateEmp = () => {
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'empId',
-            message: "Which employee's role do you want to update?",
-        },
-        {
-            type: 'list',
-            name: 'roleId',
-            message: 'Which role do you want to assign the selected employee?',
-            choices: roleChoices
+// query to get role choices
+function getRoleChoices(choices){
+    db.query('SELECT * FROM role_list', (err, res) => {
+        if (err) {
+            console.log(err);
+            choices(err, null);
+        } else {
+            const roleChoices = res.map((role) => ({
+                value: role.id,
+                name: role.title
+            }));
+            choices(null, roleChoices);
         }
-    ]).then((response) => { 
-        const { empId, roleId } = response;
-
-        db.query(
-            `UPDATE employee_list
-            SET role_list_id = ?
-            WHERE id =?`,
-            [roleId, empId], (err, res) => {
-                if(err) {
-                    console.log(err);
-                } else {
-                    console.log(`Updated ${empId}'s role`);
-                }
-                init();
-            }
-        );
     });
 };
 
+// query to update employee
+
+function updateEmp(){
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'fullName',
+            message: "Enter the employee's name:",
+        }
+    ]).then((nameResponse) => {
+        const { fullName } = nameResponse;
+        const [firstName, lastName] = fullName.split(' ');
+
+        getRoleChoices((err, roleChoices) => {
+            if (err) {
+                console.log(err);
+                init();
+            } else {
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'roleId',
+                        message: 'Which role do you want to assign the selected employee?',
+                        choices: roleChoices
+                    }
+                ]).then((roleResponse) => {
+                    const { roleId } = roleResponse;
+
+                    db.query(
+                        `UPDATE employee_list
+                        SET role_list_id = ?
+                        WHERE first_name = ? AND last_name = ?`,
+                        [roleId, firstName, lastName],
+                        (err, __res) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log(`Updated ${fullName}'s role`);
+                            }
+                            init();
+                        }
+                    );
+                });
+            }
+        });
+    });
+};
+
+
 // function to quit and exit app
-const quit = () => {
+function quit() {
     console.log('Thank you for using the Employee Tracker App!');
     process.exit();
 };
-
-// app.use((req, res) => {
-//     res.status(404).end();
-//   });
-  
-//   app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-//   });
 
 // initiate app
 init();
