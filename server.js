@@ -73,7 +73,7 @@ function init() {
 // query to see all employees
 function viewEmp(){
     db.query(
-        `SELECT e.id AS 'Employee ID', e.first_name AS 'First Name', e.last_name AS 'Last Name', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary',
+        `SELECT e.id AS 'id', e.first_name AS 'First Name', e.last_name AS 'Last Name', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary',
         CONCAT(m.first_name, ' ', m.last_name) AS 'Manager'
         FROM employee_list e
         JOIN role_list r ON e.role_list_id = r.id
@@ -87,7 +87,7 @@ function viewEmp(){
 
 // query to see all departments
 function viewDepts(){
-    db.query(`SELECT id AS 'Department ID', dep_name AS 'Department Name' FROM dep_list;`, 
+    db.query(`SELECT id AS 'id', dep_name AS 'Department Name' FROM dep_list;`, 
     (err, res) => {
         err ? console.log(err) : console.table(`\n`, res),
         init();
@@ -96,7 +96,7 @@ function viewDepts(){
 
 // query to see all roles
 function viewRoles(){
-    db.query(`SELECT r.id AS 'Role ID', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary'
+    db.query(`SELECT r.id AS 'id', r.title AS 'Job Title', d.dep_name AS 'Department', r.salary AS 'Salary'
     FROM role_list r
     JOIN dep_list d ON r.dep_list_id = d.id;`, 
     (err, res) => {
