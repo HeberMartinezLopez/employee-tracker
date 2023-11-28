@@ -53,7 +53,7 @@ To use this app:
 
 The link below is a video walkthrough on how the app works:
 
-[]()
+[https://drive.google.com/file/d/1gt8Tf-FEOoVqU0l9pAQCxSfFASUSQhgO/view?usp=sharing](https://drive.google.com/file/d/1gt8Tf-FEOoVqU0l9pAQCxSfFASUSQhgO/view?usp=sharing)
 
 ## License
 
